@@ -1,0 +1,78 @@
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta http-equiv="X-UA-compatible" content="ie=edg" />
+		<title>Document</title>	
+		<style >
+			div {width: 300px; height:200px;
+			   border: 1px black solid ; background: white;} 
+		</style>
+	</head>
+	<body bgcolor="aqua">
+		<!--
+		        	作者：offline
+		        	时间：2021-01-31
+		        	描述：输入内容
+		      -->
+				<input type="text" placeholder="输入你的内容">
+				<!--
+		        	作者：offline
+		        	时间：2021-01-31
+		        	描述：发送请求
+		        -->
+				<button>发送请求</button>
+				<!--
+		        	作者：offline
+		        	时间：2021-01-31
+		        	描述：显示结果
+		        -->
+				<div></div>
+				<script>
+					var input = document.querySelector('input')
+					var button = document.querySelector('button')
+					var div = document.querySelector('div')
+					//演示websocker在浏览器端如何使用
+					//H5已经直接提供了websocket的API，所以我们可以直接去使用
+					
+					//1.创建websocket
+					//参数1：websocket的服务地址
+					var socket = new WebSocket('ws://localhost:3000')
+					//2.open:当websocket服务器连接成功时触发
+					socket.addEventListener('open', function(){
+						div.innerHTML = '连接服务器成功'
+					})
+					//3.主动给websocket服务器发送消息
+					button.addEventListener('click', function(){
+						var value = input.value
+						socket.send(value)
+					})
+					//4接受websocket服务的数据
+					socket.addEventListener('message',function(e){
+						console.log(e.data)
+						div.innerHTML = e.data
+					})
+					socket.addEventListener('close', function(){
+						div.innerHTML = '服务断开连接'
+					})
+					var ws = require("nodejs-websocket")
+					var port=3000;
+					// Scream server example: "hi" -> "HI!!!"
+					var server = ws.createServer(function (conn) {
+						console.log("New connection")
+						conn.on("text", function (str) {
+							console.log("Received "+str)
+							conn.sendText(str.toUpperCase()+"!!!")
+						})
+						conn.on("close", function (code, reason) {
+							console.log("Connection closed")
+						})
+						conn.on("error", function (err) {
+							console.log("handdle error");
+							console.log(err);
+						})
+					}).listen(port);
+					console.log("websocket server listening on port "+port);
+				</script>
+	</body>
+</html>
