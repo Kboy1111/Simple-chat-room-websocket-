@@ -1,0 +1,25 @@
+// 导入nodejs-websocket包
+const ws = require('nodejs-websocket')
+// websocket占用的端口号
+const PORT = 3000
+
+const server = ws.createServer(connect => {
+  console.log('新的连接')
+
+  // 接收到客户端的文本内容时触发
+  connect.on('text', str => {
+    console.log('接收:' + str)
+    // 把接收到的字符串转换成大写，并且给客户端响应
+    connect.sendText(str.toUpperCase() + '!!!!')
+  })
+
+  // 监听关闭事件
+  connect.on('close', () => {
+    console.log('连接关闭了')
+  })
+
+  // 监听错误事件， 比如浏览器关闭了连接，或者发送的数据格式不对等
+  connect.on('error', err => {
+    console.log('连接异常')
+  })
+})
