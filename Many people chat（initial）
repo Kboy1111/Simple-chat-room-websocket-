@@ -1,0 +1,52 @@
+const ws = require('nodejs-websocket')
+
+const PORT = 3000
+const TYPE_MSG = 0
+const TYPE_ENTER = 1
+const TYPE_LEAVE = 2
+
+//记录当前连接上来的总的用户的数量
+let usercount = 0
+//conn每个连接到服务器的用户,都会有一个conn
+const server = ws.createServer(connect => {
+	console.log('有新用户连接了')
+	usercount++
+	connect.userName = 'user' + usercount
+	// 给所有的用户进行广播
+	broadcast({
+		type: TYPE_ENTER,
+		msg: connect.userName + '进入了聊天室',
+		date: new Date().toLocaleTimeString()
+	})
+	connect.on('text', msg => {
+		// 如果接收到用户的数据， 需要发送给所有的用户
+		broadcast({
+			type: TYPE_MSG,
+			msg: msg,
+			date: new Date().toLocaleTimeString()
+		})
+	})
+	connect.on('close', () => {
+		console.log('用户断开连接')
+		userCount--
+		// 给所有的用户发送一条用户离开的消息
+		broadcast({
+			type: TYPE_LEAVE,
+			msg: `${connect.userName}离开了聊天室`,
+			date: new Date().toLocaleTimeString()
+		})
+	})
+	connect.on('error', () => {
+		console.log('连接失败')
+	})
+})
+
+function broadcast(msg) {
+	server.connections.forEach(conn => {
+		conn.sendText(JSON.stringify(msg))
+	})
+}
+
+server.listen(PORT, () => {
+	console.log('服务器启动成功了', PORT)
+})
